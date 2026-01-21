@@ -1,10 +1,11 @@
 package com.projectmanagement.project_management_system.Controller;
 
-import com.projectmanagement.project_management_system.Entity.User;
+import com.projectmanagement.project_management_system.DTO.RegisterRequestDTO;
+import com.projectmanagement.project_management_system.DTO.UserResponseDTO;
 import com.projectmanagement.project_management_system.Service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,24 +17,18 @@ public class UserController {
 
     private final UserService userService;
 
-    private PasswordEncoder passwordEncoder;
-
-    public UserController(UserService userService, PasswordEncoder passwordEncoder) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody User user) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequestDTO request) {
         try {
-            userService.loadUserByUsername(user.getEmail());
-            return ResponseEntity.badRequest().body("User already exists with email: " + user.getEmail());
+            userService.loadUserByUsername(request.getEmail());
+            return ResponseEntity.badRequest().body("User already exists with email: " + request.getEmail());
         } catch (UsernameNotFoundException e) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            userService.saveUser(user);
-            return ResponseEntity.ok("User registered successfully");
+            UserResponseDTO userResponseDTO = userService.saveUser(request);
+            return ResponseEntity.status(201).body(userResponseDTO);
         }
-
-
     }
 }

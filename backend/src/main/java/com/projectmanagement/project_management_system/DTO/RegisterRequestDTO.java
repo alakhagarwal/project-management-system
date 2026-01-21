@@ -1,5 +1,8 @@
 package com.projectmanagement.project_management_system.DTO;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,8 +11,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterRequestDTO {
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email must be valid")
     private String email;
+
+    @NotBlank(message = "Password is required")
+    @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
+
+    @Size(max = 50, message = "First name must be at most 50 characters")
     private String firstName;
+
+    @Size(max = 50, message = "Last name must be at most 50 characters")
     private String lastName;
 }
