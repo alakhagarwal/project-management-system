@@ -3,6 +3,7 @@ package com.projectmanagement.project_management_system.Service;
 import com.projectmanagement.project_management_system.DTO.RegisterRequestDTO;
 import com.projectmanagement.project_management_system.DTO.UserResponseDTO;
 import com.projectmanagement.project_management_system.Entity.User;
+import com.projectmanagement.project_management_system.Exception.DuplicateEmailException;
 import com.projectmanagement.project_management_system.Repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -28,6 +29,11 @@ public class UserService implements UserDetailsService {
     }
 
     public UserResponseDTO saveUser(RegisterRequestDTO requestDTO) {
+
+        if (userRepository.findByEmail(requestDTO.getEmail()).isPresent()) {
+            throw new DuplicateEmailException(requestDTO.getEmail());
+        }
+
         User user = new User();
         user.setEmail(requestDTO.getEmail());
         user.setPassword(passwordEncoder.encode(requestDTO.getPassword()));

@@ -23,12 +23,7 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequestDTO request) {
-        try {
-            userService.loadUserByUsername(request.getEmail());
-            return ResponseEntity.badRequest().body("User already exists with email: " + request.getEmail());
-        } catch (UsernameNotFoundException e) {
-            UserResponseDTO userResponseDTO = userService.saveUser(request);
-            return ResponseEntity.status(201).body(userResponseDTO);
-        }
+        UserResponseDTO userResponseDTO = userService.saveUser(request);
+        return ResponseEntity.status(201).body(userResponseDTO);
     }
 }
