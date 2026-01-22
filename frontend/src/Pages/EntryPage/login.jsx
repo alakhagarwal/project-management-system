@@ -14,7 +14,9 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconAlertCircle, IconCheck, IconLogin } from "@tabler/icons-react";
-import { mockApi } from "../../components/testApi";
+import { useAuth } from "../../Hooks/useAuth.js";
+import { authService } from "../../services/authService.js";
+import { validators } from "../../utils/validators.js";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -24,6 +26,7 @@ function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -38,14 +41,26 @@ function Login() {
     e.preventDefault();
     setLoading(true);
     setError("");
+    // Validate form
+    const { isValid, errors: validationErrors } = validators.validateLoginForm(
+      formData.email,
+      formData.password,
+    );
+
+    if (!isValid) {
+      setError(Object.values(validationErrors)[0] || "Please fill all fields");
+      setLoading(false);
+      return;
+    }
 
     try {
-      const response = await mockApi.login(formData.email, formData.password);
+      const response = await authService.login(
+        formData.email,
+        formData.password,
+      );
 
-      localStorage.setItem("authToken", response.token);
-      const expiry = new Date().getTime() + response.expiresIn;
-      localStorage.setItem("tokenExpiry", expiry.toString());
-      localStorage.setItem("user", JSON.stringify(response.user));
+      // Use auth context to login
+      login(response.token, { email: formData.email });
 
       notifications.show({
         title: "Login successful!",

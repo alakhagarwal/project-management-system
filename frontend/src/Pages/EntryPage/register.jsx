@@ -15,7 +15,9 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconAlertCircle, IconCheck, IconLogin } from "@tabler/icons-react";
-import { mockApi } from "../../components/testApi.js";
+import { useAuth } from "../../Hooks/useAuth.js";
+import { authService } from "../../services/authService.js";
+import { validators } from "../../utils/validators.js";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -36,6 +38,7 @@ function Register() {
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -54,54 +57,8 @@ function Register() {
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      general: "",
-    };
-    let isValid = true;
-
-    // Validate first name
-    if (!formData.firstName.trim()) {
-      newErrors.firstName = "First name is required";
-      isValid = false;
-    }
-
-    // Validate last name
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = "Last name is required";
-      isValid = false;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.email) {
-      newErrors.email = "Email is required";
-      isValid = false;
-    } else if (!emailRegex.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
-      isValid = false;
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-      isValid = false;
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
-      isValid = false;
-    }
-
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password";
-      isValid = false;
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-      isValid = false;
-    }
-
+  const va{ isValid, errors: validationErrors } = validators.validateRegisterForm(formData);
+    setErrors(validation
     setErrors(newErrors);
     setIsSubmitted(true);
     return isValid;
@@ -135,17 +92,20 @@ function Register() {
     });
 
     try {
-      const response = await mockApi.register({
+      const response = await authService.register({
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
       });
 
-      localStorage.setItem("authToken", response.token);
-      const expiry = new Date().getTime() + response.expiresIn;
-      localStorage.setItem("tokenExpiry", expiry.toString());
-      localStorage.setItem("user", JSON.stringify(response.user));
+      // Use auth context to register/login
+      register(response.token || `mock-token-${response.id}`, {
+        id: response.id,
+        email: response.email,
+        firstName: response.firstName,
+        lastName: response.lastName,
+      });
 
       notifications.show({
         title: "Registration successful!",
@@ -157,31 +117,19 @@ function Register() {
       setTimeout(() => {
         navigate("/dashboard", { replace: true });
       }, 1000);
-    } catch (err) {
-      setErrors({
-        ...errors,
-        general: err.message || "Registration failed. Please try again.",
-      });
-      notifications.show({
-        title: "Registration failed",
-        message: err.message || "Please try again",
-        color: "red",
-        icon: <IconAlertCircle size="1rem" />,
-      });
-    } finally {
-      setLoading(false);
+    } const hasFieldErrors = Object.keys(errors).some(
+        (key) => key !== "general" && errors[key],
+      );
+      if (hasFieldErrors) {
+        setErrors((prev) => ({
+          ...prev,
+          general: "Please fix the errors above before submitting",
+        }));
+      }
+      return;
     }
-  };
 
-  const fillTestData = () => {
-    setFormData({
-      firstName: "Test",
-      lastName: "User",
-      email: `test${Date.now().toString().slice(-4)}@example.com`,
-      password: "password123",
-      confirmPassword: "password123",
-    });
-    // Clear any existing errors when filling test data
+    setLoading(true);
     setErrors({
       firstName: "",
       lastName: "",
@@ -190,8 +138,22 @@ function Register() {
       confirmPassword: "",
       general: "",
     });
-    setIsSubmitted(false);
-  };
+
+    try {
+      const response = await authService.register({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      // Use auth context to register/login
+      register(response.token || `mock-token-${response.id}`, {
+        id: response.id,
+        email: response.email,
+        firstName: response.firstName,
+        lastName: response.lastName,
+      }
 
   return (
     <div
