@@ -15,7 +15,7 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconAlertCircle, IconCheck, IconLogin } from "@tabler/icons-react";
-import { mockApi } from "../../components/testApi.js";
+import { api } from "../../components/api.js";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -135,62 +135,55 @@ function Register() {
     });
 
     try {
-      const response = await mockApi.register({
+      // Register the user
+      await api.register({
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
       });
 
-      localStorage.setItem("authToken", response.token);
-      const expiry = new Date().getTime() + response.expiresIn;
-      localStorage.setItem("tokenExpiry", expiry.toString());
-      localStorage.setItem("user", JSON.stringify(response.user));
-
       notifications.show({
         title: "Registration successful!",
-        message: "Welcome to the app! Redirecting to dashboard...",
+        message: "Please login with your credentials",
         color: "green",
         icon: <IconCheck size="1rem" />,
       });
 
       setTimeout(() => {
-        navigate("/dashboard", { replace: true });
-      }, 1000);
+        navigate("/login", { replace: true });
+      }, 1500);
     } catch (err) {
-      setErrors({
-        ...errors,
-        general: err.message || "Registration failed. Please try again.",
-      });
+      let errorMessage = err.message || "Registration failed. Please try again.";
+      
+      // Check if it's a network/fetch error
+      if (errorMessage.includes("Failed to fetch") || errorMessage.includes("NetworkError")) {
+        errorMessage = "Cannot connect to server. Please make sure the backend is running on http://localhost:8080";
+      }
+      
+      // Check if it's an email-related error
+      if (errorMessage.toLowerCase().includes("email")) {
+        setErrors({
+          ...errors,
+          email: errorMessage,
+          general: "",
+        });
+      } else {
+        setErrors({
+          ...errors,
+          general: errorMessage,
+        });
+      }
+      
       notifications.show({
         title: "Registration failed",
-        message: err.message || "Please try again",
+        message: errorMessage,
         color: "red",
         icon: <IconAlertCircle size="1rem" />,
       });
     } finally {
       setLoading(false);
     }
-  };
-
-  const fillTestData = () => {
-    setFormData({
-      firstName: "Test",
-      lastName: "User",
-      email: `test${Date.now().toString().slice(-4)}@example.com`,
-      password: "password123",
-      confirmPassword: "password123",
-    });
-    // Clear any existing errors when filling test data
-    setErrors({
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      general: "",
-    });
-    setIsSubmitted(false);
   };
 
   return (

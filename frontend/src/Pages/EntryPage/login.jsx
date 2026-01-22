@@ -14,7 +14,7 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconAlertCircle, IconCheck, IconLogin } from "@tabler/icons-react";
-import { mockApi } from "../../components/testApi";
+import { api } from "../../components/api";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -40,12 +40,10 @@ function Login() {
     setError("");
 
     try {
-      const response = await mockApi.login(formData.email, formData.password);
+      const response = await api.login(formData.email, formData.password);
 
       localStorage.setItem("authToken", response.token);
-      const expiry = new Date().getTime() + response.expiresIn;
-      localStorage.setItem("tokenExpiry", expiry.toString());
-      localStorage.setItem("user", JSON.stringify(response.user));
+      localStorage.setItem("userEmail", formData.email);
 
       notifications.show({
         title: "Login successful!",
@@ -58,23 +56,28 @@ function Login() {
         navigate("/dashboard", { replace: true });
       }, 1000);
     } catch (err) {
-      setError(err.message || "Login failed. Please try again.");
+      let errorMessage = err.message || "Login failed. Please try again.";
+      
+      console.error("Login error details:", err);
+      
+      // Check if it's a network/fetch error
+      if (errorMessage.includes("Failed to fetch") || errorMessage.includes("NetworkError")) {
+        errorMessage = "Cannot connect to server. Please make sure the backend is running on http://localhost:8080";
+      } else if (errorMessage.includes("Invalid email or password")) {
+        errorMessage = "Invalid email or password. Please check your credentials.";
+      }
+      
+      setError(errorMessage);
       notifications.show({
         title: "Login failed",
-        message: err.message || "Please check your credentials",
+        message: errorMessage,
         color: "red",
         icon: <IconAlertCircle size="1rem" />,
+        autoClose: 5000,
       });
     } finally {
       setLoading(false);
     }
-  };
-
-  const fillTestData = () => {
-    setFormData({
-      email: "",
-      password: "",
-    });
   };
 
   return (
