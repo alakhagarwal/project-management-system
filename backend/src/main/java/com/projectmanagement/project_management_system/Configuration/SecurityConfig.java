@@ -1,6 +1,7 @@
 package com.projectmanagement.project_management_system.Configuration;
 
 import com.projectmanagement.project_management_system.Filter.JWTAuthenticationFilter;
+import com.projectmanagement.project_management_system.Filter.JwtValidationFilter;
 import com.projectmanagement.project_management_system.Module.JWTAuthenticationProvider;
 import com.projectmanagement.project_management_system.Module.JWTUtil;
 import org.springframework.context.annotation.Bean;
@@ -56,6 +57,9 @@ public class SecurityConfig {
         JWTAuthenticationFilter jwtAuthFilter =
                 new JWTAuthenticationFilter(authenticationManager, jwtUtil);
 
+        JwtValidationFilter jwtValidationFilter =
+                new JwtValidationFilter(authenticationManager);
+
 
         http.authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/register", "/generate-token").permitAll()
@@ -68,6 +72,10 @@ public class SecurityConfig {
                 .addFilterBefore(
                         jwtAuthFilter,
                         org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class
+                )
+                .addFilterAfter(
+                        jwtValidationFilter,
+                        JWTAuthenticationFilter.class
                 );
 
         return http.build();
