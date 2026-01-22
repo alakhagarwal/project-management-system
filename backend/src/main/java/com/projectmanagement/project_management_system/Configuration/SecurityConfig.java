@@ -61,7 +61,9 @@ public class SecurityConfig {
                 new JwtValidationFilter(authenticationManager);
 
 
-        http.authorizeHttpRequests(auth -> auth
+        http
+                .cors(cors -> cors.configure(http)) // Enable CORS with the CorsConfig
+                .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/register", "/generate-token").permitAll()
                         .anyRequest().authenticated()
                 )
