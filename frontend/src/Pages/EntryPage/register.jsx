@@ -15,7 +15,6 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconAlertCircle, IconCheck, IconLogin } from "@tabler/icons-react";
-import { useAuth } from "../../Hooks/useAuth.js";
 import { authService } from "../../services/authService.js";
 import { validators } from "../../utils/validators.js";
 
@@ -38,7 +37,6 @@ function Register() {
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const navigate = useNavigate();
-  const { register } = useAuth();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -57,8 +55,16 @@ function Register() {
     }
   };
 
-  const va{ isValid, errors: validationErrors } = validators.validateRegisterForm(formData);
-    setErrors(validation
+  const validateForm = () => {
+    const { isValid, errors: validationErrors } = validators.validateRegisterForm(formData);
+    const newErrors = {
+      firstName: validationErrors.firstName || "",
+      lastName: validationErrors.lastName || "",
+      email: validationErrors.email || "",
+      password: validationErrors.password || "",
+      confirmPassword: validationErrors.confirmPassword || "",
+      general: "",
+    };
     setErrors(newErrors);
     setIsSubmitted(true);
     return isValid;
@@ -99,14 +105,8 @@ function Register() {
         password: formData.password,
       });
 
-      // Use auth context to register/login
-      register(response.token || `mock-token-${response.id}`, {
-        id: response.id,
-        email: response.email,
-        firstName: response.firstName,
-        lastName: response.lastName,
-      });
-
+      // Registration successful - redirect to login page
+      // Backend registration doesn't return a token, user needs to login
       notifications.show({
         title: "Registration successful!",
         message: "Please login with your credentials",
@@ -115,45 +115,18 @@ function Register() {
       });
 
       setTimeout(() => {
-        navigate("/dashboard", { replace: true });
+        navigate("/login", { replace: true });
       }, 1000);
-    } const hasFieldErrors = Object.keys(errors).some(
-        (key) => key !== "general" && errors[key],
-      );
-      if (hasFieldErrors) {
-        setErrors((prev) => ({
-          ...prev,
-          general: "Please fix the errors above before submitting",
-        }));
-      }
-      return;
+    } catch (error) {
+      console.error("Registration error:", error);
+      setErrors((prev) => ({
+        ...prev,
+        general: error.message || "Registration failed. Please try again.",
+      }));
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(true);
-    setErrors({
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      general: "",
-    });
-
-    try {
-      const response = await authService.register({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password,
-      });
-
-      // Use auth context to register/login
-      register(response.token || `mock-token-${response.id}`, {
-        id: response.id,
-        email: response.email,
-        firstName: response.firstName,
-        lastName: response.lastName,
-      }
+  };
 
   return (
     <div
@@ -196,9 +169,8 @@ function Register() {
 
           {errors.general && (
             <Alert
-              variant="filled"
+              variant="light"
               color="red"
-              title="Error"
               icon={<IconAlertCircle size="1rem" />}
               mb="md"
               radius="md"
@@ -285,7 +257,7 @@ function Register() {
 
               <PasswordInput
                 label="Password"
-                placeholder="At least 8 characters"
+                placeholder="At least 6 characters"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}

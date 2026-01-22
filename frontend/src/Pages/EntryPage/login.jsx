@@ -137,9 +137,8 @@ function Login() {
 
           {error && (
             <Alert
-              variant="filled"
+              variant="light"
               color="red"
-              title="Error"
               icon={<IconAlertCircle size="1rem" />}
               mb="md"
               radius="md"

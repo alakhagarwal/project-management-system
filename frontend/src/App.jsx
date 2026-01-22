@@ -3,8 +3,10 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import { ProtectedRoute } from "./components/ProtectedRoute.jsx";
+import { PublicRoute } from "./components/PublicRoute.jsx";
 import { Navbar } from "./components/Navbar.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import Register from "./Pages/EntryPage/register.jsx";
@@ -14,13 +16,33 @@ import NotFound from "./Pages/NotFound.jsx";
 import "./App.css";
 
 function AppRoutes() {
+  const location = useLocation();
+  
+  // Hide navbar on login and register pages
+  const hideNavbarPaths = ["/login", "/register"];
+  const shouldShowNavbar = !hideNavbarPaths.includes(location.pathname);
+
   return (
     <>
-      <Navbar />
+      {shouldShowNavbar && <Navbar />}
       <Routes>
-        {/* Public Routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        {/* Public Routes - redirect to dashboard if already authenticated */}
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          }
+        />
 
         {/* Protected Routes */}
         <Route

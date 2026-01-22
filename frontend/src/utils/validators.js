@@ -9,9 +9,9 @@ export const validators = {
     return emailRegex.test(email);
   },
 
-  // Validate password strength
+  // Validate password strength (minimum 6 characters as per backend)
   isValidPassword: (password) => {
-    return password && password.length >= 8;
+    return password && password.length >= 6;
   },
 
   // Validate name (not empty)
@@ -45,7 +45,7 @@ export const validators = {
     if (!formData.password) {
       errors.password = "Password is required";
     } else if (!validators.isValidPassword(formData.password)) {
-      errors.password = "Password must be at least 8 characters";
+      errors.password = "Password must be at least 6 characters";
     }
 
     if (!formData.confirmPassword) {
