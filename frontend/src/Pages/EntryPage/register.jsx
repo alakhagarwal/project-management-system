@@ -56,7 +56,8 @@ function Register() {
   };
 
   const validateForm = () => {
-    const { isValid, errors: validationErrors } = validators.validateRegisterForm(formData);
+    const { isValid, errors: validationErrors } =
+      validators.validateRegisterForm(formData);
     const newErrors = {
       firstName: validationErrors.firstName || "",
       lastName: validationErrors.lastName || "",
@@ -257,7 +258,7 @@ function Register() {
 
               <PasswordInput
                 label="Password"
-                placeholder="At least 6 characters"
+                placeholder="At least 8 characters"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}

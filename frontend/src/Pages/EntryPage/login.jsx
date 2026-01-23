@@ -74,16 +74,21 @@ function Login() {
       }, 1000);
     } catch (err) {
       let errorMessage = err.message || "Login failed. Please try again.";
-      
+
       console.error("Login error details:", err);
-      
+
       // Check if it's a network/fetch error
-      if (errorMessage.includes("Failed to fetch") || errorMessage.includes("NetworkError")) {
-        errorMessage = "Cannot connect to server. Please make sure the backend is running on http://localhost:8080";
+      if (
+        errorMessage.includes("Failed to fetch") ||
+        errorMessage.includes("NetworkError")
+      ) {
+        errorMessage =
+          "Cannot connect to server. Please make sure the backend is running on http://localhost:8080";
       } else if (errorMessage.includes("Invalid email or password")) {
-        errorMessage = "Invalid email or password. Please check your credentials.";
+        errorMessage =
+          "Invalid email or password. Please check your credentials.";
       }
-      
+
       setError(errorMessage);
       notifications.show({
         title: "Login failed",
@@ -116,7 +121,7 @@ function Login() {
           style={{
             boxShadow: "0 20px 60px rgba(0, 0, 0, 0.15)",
             width: "400px",
-            height: "450px",
+            // height: "450px",
             display: "flex",
             flexDirection: "column",
           }}
