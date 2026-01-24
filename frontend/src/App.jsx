@@ -17,7 +17,7 @@ import "./App.css";
 
 function AppRoutes() {
   const location = useLocation();
-  
+
   // Hide navbar on login and register pages
   const hideNavbarPaths = ["/login", "/register"];
   const shouldShowNavbar = !hideNavbarPaths.includes(location.pathname);
@@ -54,8 +54,15 @@ function AppRoutes() {
           }
         />
 
-        {/* Default & Catch-all Routes */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        {/* Default Route - Dashboard as fallback */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <DashBoard />
+            </ProtectedRoute>
+          }
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
