@@ -64,7 +64,7 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configure(http)) // Enable CORS with the CorsConfig
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/register", "/generate-token").permitAll()
+                        .requestMatchers("/auth/register", "/generate-token","/upload","/download/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

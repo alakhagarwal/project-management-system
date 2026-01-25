@@ -29,7 +29,9 @@ public class JwtValidationFilter extends OncePerRequestFilter {
         // Skip JWT validation for public endpoints
         String requestPath = request.getServletPath();
         if (requestPath.equals("/auth/register") ||
-                requestPath.equals("/generate-token")
+                requestPath.equals("/generate-token")||
+                requestPath.equals("/upload")||
+                requestPath.startsWith("/download/")
         ) {
             filterChain.doFilter(request, response);
             return;
