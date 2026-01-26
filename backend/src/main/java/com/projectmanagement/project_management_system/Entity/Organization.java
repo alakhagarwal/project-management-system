@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
-
 @Entity
 @Data
 @NoArgsConstructor
@@ -23,13 +21,13 @@ public class Organization {
     @Column(nullable = false, unique = true)
     private String slug;
 
-    // S3 public URL
-    @Column
-    private String logoUrl;
+    // S3 key (file path in S3 bucket) - NOT the URL
+    // Example: "organizations/my-org/uuid-logo.png"
+    @Column(length = 600)
+    private String LogoUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
-
 
 }

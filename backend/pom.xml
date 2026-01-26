@@ -94,10 +94,6 @@
             <artifactId>spring-dotenv</artifactId>
             <version>4.0.0</version>
         </dependency>
-        <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>s3-presigner</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
