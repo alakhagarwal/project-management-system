@@ -1,0 +1,35 @@
+package com.projectmanagement.project_management_system.Entity;
+
+import com.projectmanagement.project_management_system.Enums.MemberStatus;
+import com.projectmanagement.project_management_system.Enums.OrganizationRole;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class OrganizationMember {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "org_id", nullable = false)
+    private Organization organization;
+
+    @Column(nullable = false)
+    private OrganizationRole organizationRole; // e.g., "ADMIN", "MEMBER"
+
+    @Column(nullable = false)
+    private MemberStatus memberStatus; // e.g., "ACTIVE", "INVITED"
+
+
+}
