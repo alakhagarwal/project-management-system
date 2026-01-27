@@ -37,3 +37,12 @@ build/
 .env.local
 .env.*.local
 
+### Application Properties with Secrets ###
+application-local.properties
+application-secrets.properties
+
+### AWS Credentials ###
+.aws/
+credentials
+config
+
