@@ -16,4 +16,8 @@ public interface OrganizationRepository extends JpaRepository<Organization, Long
     // Find organizations created by a user with the given email
     @Query("SELECT o FROM Organization o WHERE o.createdBy.email = :email")
     List<Organization> findByCreatorEmail(@Param("email") String email);
+
+    @Query("SELECT o FROM Organization o WHERE o.createdBy.id = :userId")
+    Organization findByCreatedById(@Param("userId") Long id);
+
 }
