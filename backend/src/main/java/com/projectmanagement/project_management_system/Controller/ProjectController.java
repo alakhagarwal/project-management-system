@@ -1,8 +1,10 @@
 package com.projectmanagement.project_management_system.Controller;
 
 import com.projectmanagement.project_management_system.DTO.CreateProjDTO;
+import com.projectmanagement.project_management_system.DTO.ProjResponse;
 import com.projectmanagement.project_management_system.Entity.Project;
 import com.projectmanagement.project_management_system.Service.ProjectService;
+import jakarta.validation.Valid;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,10 +26,10 @@ public class ProjectController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createProject(@RequestBody CreateProjDTO createProjDTO,
+    public ResponseEntity<?> createProject(@RequestBody @Valid CreateProjDTO createProjDTO,
                                            @AuthenticationPrincipal UserDetails userDetails) {
-        Project project = projectService.save(createProjDTO, userDetails.getUsername());
-        return ResponseEntity.ok(project);
+        ProjResponse projResponse = projectService.save(createProjDTO, userDetails.getUsername());
+        return ResponseEntity.ok(projResponse);
 
     }
 }
