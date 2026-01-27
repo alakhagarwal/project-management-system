@@ -5,14 +5,12 @@ import com.projectmanagement.project_management_system.DTO.ProjResponse;
 import com.projectmanagement.project_management_system.Service.ProjectService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/proj")
@@ -26,5 +24,11 @@ public class ProjectController {
                                                       @AuthenticationPrincipal UserDetails userDetails) {
         ProjResponse projResponse = projectService.save(createProjDTO, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.OK).body(projResponse);
+    }
+
+    @GetMapping("/getAll/{organizationId}")
+    public ResponseEntity<?> getAllProjects(@PathVariable Long organizationId) {
+        return ResponseEntity.status(HttpStatus.OK).body(projectService.getAllProjects(organizationId));
+
     }
 }

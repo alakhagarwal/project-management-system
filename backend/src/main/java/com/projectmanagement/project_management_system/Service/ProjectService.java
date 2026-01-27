@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -104,5 +105,21 @@ public class ProjectService {
 
         return projResponse;
 
+    }
+
+    public List<ProjResponse> getAllProjects(Long organizationId) {
+        List<Project> projects = projectRepository.findByOrganizationId(organizationId);
+        return projects.stream().map(project -> new ProjResponse(
+                project.getId(),
+                project.getName(),
+                project.getDescription(),
+                project.getOrganization().getId(),
+                project.getCreatedBy().getEmail(),
+                project.getTeamLead().getEmail(),
+                project.getProjectStatus(),
+                project.getProjectPriority(),
+                project.getStartDate(),
+                project.getEndDate()
+        )).toList();
     }
 }
