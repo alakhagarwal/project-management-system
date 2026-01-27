@@ -26,9 +26,11 @@ public class OrganizationMember {
     private Organization organization;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private OrganizationRole organizationRole; // e.g., "ADMIN", "MEMBER"
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private MemberStatus memberStatus; // e.g., "ACTIVE", "INVITED"
 
 

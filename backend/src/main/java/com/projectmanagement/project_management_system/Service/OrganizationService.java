@@ -2,7 +2,11 @@ package com.projectmanagement.project_management_system.Service;
 
 import com.projectmanagement.project_management_system.DTO.OrgResponse;
 import com.projectmanagement.project_management_system.Entity.Organization;
+import com.projectmanagement.project_management_system.Entity.OrganizationMember;
 import com.projectmanagement.project_management_system.Entity.User;
+import com.projectmanagement.project_management_system.Enums.MemberStatus;
+import com.projectmanagement.project_management_system.Enums.OrganizationRole;
+import com.projectmanagement.project_management_system.Repository.OrganizationMemberRepository;
 import com.projectmanagement.project_management_system.Repository.OrganizationRepository;
 import com.projectmanagement.project_management_system.Repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -30,6 +34,7 @@ public class OrganizationService {
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
     private final UserRepository userRepository;
+    private final OrganizationMemberRepository organizationMemberRepository;
 
     @Value("${aws.bucket.name}")
     private String bucketName;
@@ -37,11 +42,12 @@ public class OrganizationService {
     @Value("${aws.region}")
     private String awsRegion;
 
-    public OrganizationService(OrganizationRepository organizationRepository, S3Client s3Client, S3Presigner s3Presigner, UserRepository userRepository) {
+    public OrganizationService(OrganizationRepository organizationRepository, S3Client s3Client, S3Presigner s3Presigner, UserRepository userRepository, OrganizationMemberRepository organizationMemberRepository) {
         this.organizationRepository = organizationRepository;
         this.s3Client = s3Client;
         this.s3Presigner = s3Presigner;
         this.userRepository = userRepository;
+        this.organizationMemberRepository = organizationMemberRepository;
     }
 
     @Transactional // ensures if S3 upload fails, database rollback happens
@@ -71,8 +77,17 @@ public class OrganizationService {
         // Step 5: Save to database
         Organization savedOrg = organizationRepository.save(organization);
 
-        // Step 6: Generate presigned URL for response (fresh URL, valid for 7 days)
+        // Step 6: Create OrganizationMember entry (creator becomes ADMIN)
+        OrganizationMember organizationMember = new OrganizationMember();
+        organizationMember.setUser(creator);
+        organizationMember.setOrganization(savedOrg);
+        organizationMember.setOrganizationRole(OrganizationRole.ADMIN);
+        organizationMember.setMemberStatus(MemberStatus.ACTIVE);
+        organizationMemberRepository.save(organizationMember);
+
+        // Step 7: Generate presigned URL for response (fresh URL, valid for 7 days)
         String presignedUrl = s3Key != null ? generatePresignedUrl(s3Key) : null;
+
 
         return new OrgResponse(
                 savedOrg.getId(),
