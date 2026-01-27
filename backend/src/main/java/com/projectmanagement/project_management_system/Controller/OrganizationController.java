@@ -30,5 +30,10 @@ public class OrganizationController {
         return ResponseEntity.ok(orgResponse);
     }
 
+    @GetMapping("/getAll")
+    public ResponseEntity<?> getAllByEmail(@AuthenticationPrincipal UserDetails userDetails)  {
+        return ResponseEntity.ok(organizationService.getAllOrganizationsbyEmail(userDetails.getUsername()));
+    }
+
 
 }

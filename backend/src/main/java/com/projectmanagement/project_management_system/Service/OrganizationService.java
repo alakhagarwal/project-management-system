@@ -19,6 +19,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -54,28 +55,30 @@ public class OrganizationService {
         }
 
         // Step 3: Upload logo to S3 (if provided)
-        String logoUrl = null;
+        String s3Key = null;
         if (logo != null && !logo.isEmpty()) {
-            logoUrl = uploadToS3(logo, slug);
+            s3Key = uploadToS3(logo, slug);
         }
 
         // Step 4: Save organization to DB
         Organization organization = new Organization();
         organization.setName(name);
         organization.setSlug(slug);
-        organization.setLogoUrl(logoUrl);
+        organization.setLogoUrl(s3Key);  // Store S3 key, not presigned URL
         organization.setCreatedBy(creator);
 
 
         // Step 5: Save to database
         Organization savedOrg = organizationRepository.save(organization);
 
-        // Step 6: Return response DTO
+        // Step 6: Generate presigned URL for response (fresh URL, valid for 7 days)
+        String presignedUrl = s3Key != null ? generatePresignedUrl(s3Key) : null;
+
         return new OrgResponse(
                 savedOrg.getId(),
                 savedOrg.getName(),
                 savedOrg.getSlug(),
-                savedOrg.getLogoUrl()
+                presignedUrl  // Return presigned URL in response, but S3 key is stored in DB
         );
 
 
@@ -97,8 +100,8 @@ public class OrganizationService {
                 RequestBody.fromBytes(file.getBytes())
         );
 
-        // Return pre-signed URL instead of public URL
-        return generatePresignedUrl(fileName);
+        // Return S3 key (path) to store in database
+        return fileName;
     }
 
     // Method to generate pre-signed URL (valid for 7 days)
@@ -111,5 +114,18 @@ public class OrganizationService {
         PresignedGetObjectRequest presignedRequest = s3Presigner.presignGetObject(presignRequest);
 
         return presignedRequest.url().toString();
+    }
+
+    public List<OrgResponse> getAllOrganizationsbyEmail(String email) {
+        List<Organization> orgs = organizationRepository.findByCreatorEmail(email);
+        List<OrgResponse> orgResponses = orgs.stream().map(org -> new OrgResponse(
+                org.getId(),
+                org.getName(),
+                org.getSlug(),
+                org.getLogoUrl() != null ? generatePresignedUrl(org.getLogoUrl()) : null
+
+        )).toList();
+
+        return orgResponses;
     }
 }
