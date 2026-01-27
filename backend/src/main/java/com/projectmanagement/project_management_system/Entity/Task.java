@@ -2,6 +2,7 @@ package com.projectmanagement.project_management_system.Entity;
 
 import com.projectmanagement.project_management_system.Enums.ProjectPriority;
 import com.projectmanagement.project_management_system.Enums.TaskPriority;
+import com.projectmanagement.project_management_system.Enums.TaskStatus;
 import com.projectmanagement.project_management_system.Enums.TaskType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -46,12 +47,11 @@ public class Task {
     private TaskPriority taskPriority;
 
     @Enumerated(EnumType.STRING)
-    private ProjectPriority.TaskStatus taskStatus;
+    private TaskStatus taskStatus;
 
     private LocalDate dueDate;
 
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
-
 
 }
