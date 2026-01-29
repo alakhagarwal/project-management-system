@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -33,5 +35,10 @@ public class OrganizationMember {
     @Enumerated(EnumType.STRING)
     private MemberStatus memberStatus; // e.g., "ACTIVE", "INVITED"
 
+    @Column(name = "invite_token", unique = true)
+    private String inviteToken;
+
+    @Column(name = "invite_expires_at")
+    private Instant inviteExpiresAt;
 
 }

@@ -1,11 +1,13 @@
 package com.projectmanagement.project_management_system.Service;
 
+import com.projectmanagement.project_management_system.DTO.InviteRequestDTO;
 import com.projectmanagement.project_management_system.DTO.OrgResponse;
 import com.projectmanagement.project_management_system.Entity.Organization;
 import com.projectmanagement.project_management_system.Entity.OrganizationMember;
 import com.projectmanagement.project_management_system.Entity.User;
 import com.projectmanagement.project_management_system.Enums.MemberStatus;
 import com.projectmanagement.project_management_system.Enums.OrganizationRole;
+import com.projectmanagement.project_management_system.Exception.InvalidRequestException;
 import com.projectmanagement.project_management_system.Repository.OrganizationMemberRepository;
 import com.projectmanagement.project_management_system.Repository.OrganizationRepository;
 import com.projectmanagement.project_management_system.Repository.UserRepository;
@@ -82,6 +84,8 @@ public class OrganizationService {
         organizationMember.setOrganization(savedOrg);
         organizationMember.setOrganizationRole(OrganizationRole.ADMIN);
         organizationMember.setMemberStatus(MemberStatus.ACTIVE);
+        organizationMember.setInviteToken(null); // No invite token for creator
+        organizationMember.setInviteExpiresAt(null); // No expiration for creator
         organizationMemberRepository.save(organizationMember);
 
         // Step 7: Generate presigned URL for response (fresh URL, valid for 7 days)
@@ -92,7 +96,8 @@ public class OrganizationService {
                 savedOrg.getId(),
                 savedOrg.getName(),
                 savedOrg.getSlug(),
-                presignedUrl  // Return presigned URL in response, but S3 key is stored in DB
+                presignedUrl,  // Return presigned URL in response, but S3 key is stored in DB
+                OrganizationRole.ADMIN
         );
 
 
@@ -132,11 +137,14 @@ public class OrganizationService {
 
     public List<OrgResponse> getAllOrganizationsbyEmail(String email) {
         List<Organization> orgs = organizationRepository.findByCreatorEmail(email);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new InvalidRequestException("User not found"));
         List<OrgResponse> orgResponses = orgs.stream().map(org -> new OrgResponse(
                 org.getId(),
                 org.getName(),
                 org.getSlug(),
-                org.getLogoUrl() != null ? generatePresignedUrl(org.getLogoUrl()) : null
+                org.getLogoUrl() != null ? generatePresignedUrl(org.getLogoUrl()) : null,
+                organizationMemberRepository.findRoleByOrganizationAndUser(org,user)
 
         )).toList();
 
@@ -146,5 +154,30 @@ public class OrganizationService {
     public Organization findByCreater(Long id) {
 
         return organizationRepository.findByCreatedById(id);
+    }
+
+    public void inviteMember(Long orgId, InviteRequestDTO memberAddDTO) {
+//        Organization organization = organizationRepository.findById(orgId)
+//                .orElseThrow(() -> new InvalidRequestException("Organization not found"));
+//
+//        User user = userRepository.findByEmail(memberAddDTO.getEmail())
+//                .orElseThrow(() -> new InvalidRequestException("User not found"));
+//
+//        // Check if the user is already a member of the organization
+//        boolean isMemberExists = organizationMemberRepository.existsByOrganizationAndUser(organization, user);
+//        if (isMemberExists) {
+//            throw new InvalidRequestException("User is already a member of the organization");
+//        }
+//
+//        OrganizationMember organizationMember = new OrganizationMember();
+//        organizationMember.setUser();
+//        organizationMember.setOrganization(savedOrg);
+//        organizationMember.setOrganizationRole(OrganizationRole.ADMIN);
+//        organizationMember.setMemberStatus(MemberStatus.ACTIVE);
+//        organizationMember.setInviteToken(null); // No invite token for creator
+//        organizationMember.setInviteExpiresAt(null); // No expiration for creator
+//        organizationMemberRepository.save(organizationMember);
+//
+//        organizationMemberRepository.save(organizationMember);
     }
 }

@@ -1,5 +1,6 @@
 package com.projectmanagement.project_management_system.Controller;
 
+import com.projectmanagement.project_management_system.DTO.InviteRequestDTO;
 import com.projectmanagement.project_management_system.DTO.OrgResponse;
 import com.projectmanagement.project_management_system.Service.OrganizationService;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,14 @@ public class OrganizationController {
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllByEmail(@AuthenticationPrincipal UserDetails userDetails)  {
         return ResponseEntity.ok(organizationService.getAllOrganizationsbyEmail(userDetails.getUsername()));
+    }
+
+    @PostMapping("/{orgId}/invite")
+    public ResponseEntity<?> inviteMember(
+            @PathVariable Long orgId,
+            @RequestBody InviteRequestDTO memberAddDTO){
+        organizationService.inviteMember(orgId, memberAddDTO);
+        return ResponseEntity.ok("Invitation sent successfully");
     }
 
 
