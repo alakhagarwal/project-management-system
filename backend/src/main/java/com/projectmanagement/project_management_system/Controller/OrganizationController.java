@@ -39,9 +39,19 @@ public class OrganizationController {
     @PostMapping("/{orgId}/invite")
     public ResponseEntity<?> inviteMember(
             @PathVariable Long orgId,
-            @RequestBody InviteRequestDTO memberAddDTO){
-        organizationService.inviteMember(orgId, memberAddDTO);
+            @RequestBody InviteRequestDTO memberAddDTO,
+            @AuthenticationPrincipal UserDetails userDetails){
+        organizationService.inviteMember(userDetails.getUsername(),orgId, memberAddDTO);
         return ResponseEntity.ok("Invitation sent successfully");
+    }
+
+    @PostMapping("/accept-invite")
+    public ResponseEntity<?> acceptInvitation(
+            @RequestParam String token,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        organizationService.acceptInvitation(token, userDetails.getUsername());
+        return ResponseEntity.ok("Invitation accepted");
     }
 
 

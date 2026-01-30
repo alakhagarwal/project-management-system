@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -27,6 +28,13 @@ public interface OrganizationMemberRepository extends JpaRepository<Organization
     boolean existsByOrganizationAndUser(Organization organization, User user);
 
     @Query("SELECT om.organizationRole FROM OrganizationMember om WHERE om.organization = :organization AND om.user = :user")
-    OrganizationRole findRoleByOrganizationAndUser(@Param("organization") Organization organization, @Param("user") User user);
+    Optional<OrganizationRole> findRoleByOrganizationAndUser(@Param("organization") Organization organization, @Param("user") User user);
 
+    Optional<OrganizationMember> findByInviteToken(String inviteToken);
+
+    Optional<OrganizationMember> findByUserAndOrganization(User invitedUser, Organization organization);
+
+    // Find all organizations where user is a member (both INVITED and ACTIVE)
+    @Query("SELECT om FROM OrganizationMember om WHERE om.user = :user")
+    List<OrganizationMember> findByUser(@Param("user") User user);
 }
