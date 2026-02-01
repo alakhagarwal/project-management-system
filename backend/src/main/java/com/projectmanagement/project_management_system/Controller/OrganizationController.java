@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/org")
@@ -47,11 +49,15 @@ public class OrganizationController {
 
     @PostMapping("/accept-invite")
     public ResponseEntity<?> acceptInvitation(
-            @RequestParam String token,
-            @AuthenticationPrincipal UserDetails userDetails
+            @RequestParam String token
     ) {
-        organizationService.acceptInvitation(token, userDetails.getUsername());
-        return ResponseEntity.ok("Invitation accepted");
+        String userEmail = organizationService.acceptInvitation(token);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("email", userEmail);
+        response.put("message", "Invitation accepted successfully");
+
+        return ResponseEntity.ok(response);
     }
 
 

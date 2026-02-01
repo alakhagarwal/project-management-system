@@ -20,4 +20,6 @@ public interface OrganizationRepository extends JpaRepository<Organization, Long
     @Query("SELECT o FROM Organization o WHERE o.createdBy.id = :userId")
     Organization findByCreatedById(@Param("userId") Long id);
 
+
+
 }

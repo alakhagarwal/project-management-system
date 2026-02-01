@@ -244,17 +244,17 @@ public class OrganizationService {
     }
 
     @Transactional
-    public void acceptInvitation(String token, String username) {
+    public String acceptInvitation(String token) {
         OrganizationMember invitation = organizationMemberRepository
                 .findByInviteToken(token)
                 .orElseThrow(() -> new InvalidRequestException("Invalid invitation token"));
+
 
         if (invitation.getInviteExpiresAt().isBefore(java.time.Instant.now())) {
             throw new InvalidRequestException("Invitation token has expired");
         }
 
-        User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new InvalidRequestException("User not found"));
+        User user = invitation.getUser();
 
         // Check if already active
         if (invitation.getMemberStatus() == MemberStatus.ACTIVE) {
@@ -267,5 +267,7 @@ public class OrganizationService {
         invitation.setInviteExpiresAt(null);
 
         organizationMemberRepository.save(invitation);
+
+        return user.getEmail();
     }
 }

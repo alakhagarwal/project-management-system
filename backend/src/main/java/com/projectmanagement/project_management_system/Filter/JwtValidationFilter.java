@@ -31,6 +31,7 @@ public class JwtValidationFilter extends OncePerRequestFilter {
         if (requestPath.equals("/auth/register") ||
                 requestPath.equals("/generate-token")||
                 requestPath.equals("/upload")||
+                requestPath.equals("/org/accept-invite")||
                 requestPath.startsWith("/download/")
         ) {
             filterChain.doFilter(request, response);

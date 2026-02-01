@@ -37,4 +37,6 @@ public interface OrganizationMemberRepository extends JpaRepository<Organization
     // Find all organizations where user is a member (both INVITED and ACTIVE)
     @Query("SELECT om FROM OrganizationMember om WHERE om.user = :user")
     List<OrganizationMember> findByUser(@Param("user") User user);
+
+
 }
